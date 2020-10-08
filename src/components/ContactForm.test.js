@@ -18,18 +18,14 @@ const messageInput = screen.getByTestId(/message/i);
   const button = screen.getByTestId("input-submit");
 
   //check to see if you can fill out form inputs
-//   if(firstNameInput.length<3 || firstNameInput.length === 3){
-     
-//   }else{
-//       null
-//   }
+
 fireEvent.change(firstNameInput, {target: {value: "Adela"}});
 fireEvent.change(lastNameInput, {target: {value: "Zalewski"}});
 fireEvent.change(emailInput, {target: {value: "paliuadela@yahoo.com"}});
 fireEvent.change(messageInput, {target: {value: "abcdefg..."}});
 
   //assertion to make sure the inputs comtain the values typed in
-  expect(firstNameInput).toHaveValue("Adela"); //this test helped me find a bug
+  expect(firstNameInput).toHaveValue("Adela"); 
   expect(lastNameInput).toHaveValue("Zalewski");
   expect(emailInput).toHaveValue("paliuadela@yahoo.com");
 
@@ -39,9 +35,38 @@ fireEvent.change(messageInput, {target: {value: "abcdefg..."}});
   //check to see if you can submit the form 
   fireEvent.click(button);
 
+
+  //tests that check validation and the maxLength on the name input
+  //helped me see that the form can not submit since the name input has a name bigger then the maxLength and the form can not submit at that point
+  //test error message maxLength issue on the first name input
+  //so i corrected the code and now the form can submit and the test is passing
+  //this test checks to see if on the screen/ document there is a data coming back from the server
   const formData = await screen.findByText(/adela/i) ;
   expect(formData).toHaveTextContent("adela");
-  //doing the  maxLength test
-//   expect(firstNameInput).toHaveValue("maxLength", {value: 3});
+  expect(formData).toBeTruthy();
+  expect(formData).toBeInTheDocument();
 
+})
+test("test for the api call post request", async () => {
+  render(<ContactForm />)
+
+  //check for async calls and the post request
+const apiCall = require("./ContactForm");
+const axios = require("axios");
+jest.mock("axios");
+async () => {
+  axios.post({
+    data: [
+      {
+        id: 1,
+        firstName: "adela",
+        lastName: "zalewski",
+        email: "paliuadela@yahoo.com",
+        message: "abcdefgjhdbs"
+      }
+    ]
+  });
+  const firstName = await apiCall();
+  expect(firstName).toEqual("adela");
+}
 })
